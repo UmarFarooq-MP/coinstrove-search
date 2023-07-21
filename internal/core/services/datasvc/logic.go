@@ -3,10 +3,11 @@ package datasvc
 import "coinstrove-search/internal/core/ports"
 
 type newDataSVC struct {
+	dataServiceRepo ports.DataSVCRepository
 }
 
-func NewDataService() ports.DataSVC {
-	return &newDataSVC{}
+func NewDataService(dataServiceRepo ports.DataSVCRepository) ports.DataSVC {
+	return &newDataSVC{dataServiceRepo: dataServiceRepo}
 }
 
 func (dataSVC *newDataSVC) GetCoinDetails()     {}

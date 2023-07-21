@@ -61,9 +61,9 @@ func readFromQueue(dataSVCHandler *http.DataSVCHandler) {
 }
 
 func main() {
-	/*dataSVCRepo, _ :=*/ mongo.NewMongoRepository("asdas", "dasdsa", 2)
+	dataSVCRepo, _ := mongo.NewMongoRepository("asdas", "dasdsa", 2)
 	dataService := []ports.DataSVC{
-		datasvc.NewDataService(),
+		datasvc.NewDataService(dataSVCRepo),
 	}
 	dataSVCHandler := http.NewDataSVCHandler(dataService)
 	dataSVCRouter := http.SetupRouter(dataSVCHandler)
