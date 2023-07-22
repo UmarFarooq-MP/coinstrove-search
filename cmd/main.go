@@ -1,7 +1,7 @@
 package main
 
 import (
-	"coinstrove-search/internal/core/dto"
+	"coinstrove-search/internal/core/domain/dto"
 	"coinstrove-search/internal/core/ports"
 	"coinstrove-search/internal/core/services/datasvc"
 	"coinstrove-search/internal/infrastructures/http"
@@ -49,10 +49,10 @@ func readFromQueue(dataSVCHandler *http.DataSVCHandler) {
 	forever := make(chan bool)
 	go func() {
 		for d := range msgs {
-			log.Println("New Message")
 			message := dto.Message{}
 			if err = json.Unmarshal(d.Body, &message); err != nil {
 				log.Printf("Unable to Unmarshal the message from que, message = \n %s \n", d.Body)
+				continue
 			}
 			dataSVCHandler.UpdateCoinInfo(message)
 		}
@@ -61,7 +61,12 @@ func readFromQueue(dataSVCHandler *http.DataSVCHandler) {
 }
 
 func main() {
-	dataSVCRepo, _ := mongo.NewMongoRepository("asdas", "dasdsa", 2)
+	dataSVCRepo, err := mongo.NewMongoRepository("mongodb://127.0.0.1:27017/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+1.10.0",
+		"coinstrove", 2)
+	if err != nil {
+		log.Fatalf("Error while creating MongoRepository with message : %v", err)
+	}
+
 	dataService := []ports.DataSVC{
 		datasvc.NewDataService(dataSVCRepo),
 	}
@@ -69,7 +74,7 @@ func main() {
 	dataSVCRouter := http.SetupRouter(dataSVCHandler)
 	go readFromQueue(dataSVCHandler)
 
-	if err := dataSVCRouter.Run(":8081"); err != nil {
+	if err = dataSVCRouter.Run(":8081"); err != nil {
 		log.Fatalf("Failed to run server with error message %v", err)
 	}
 }
